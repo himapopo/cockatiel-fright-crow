@@ -22,22 +22,27 @@ var (
 	// カラスの初期位置
 	defaultcrowPositionX = 960
 
-	// カラスの移動値
-	CrowPositionCountMap = map[string]map[string]float64{
-		"A": {
-			"count": 1, "exec": 0, "positionY": 0, "countSpeed": 0,
-		},
-		"B": {
-			"count": 1, "exec": 0, "positionY": 0, "countSpeed": 0,
-		},
-		"C": {
-			"count": 1, "exec": 0, "positionY": 0, "countSpeed": 0,
-		},
-		"D": {
-			"count": 1, "exec": 0, "positionY": 0, "countSpeed": 0,
-		},
-	}
+	crowA *crow
+	crowB *crow
+	crowC *crow
+	crowD *crow
 )
+
+type crow struct {
+	name         string
+	moveCountNum float64
+	moveSpeed    float64
+	positionY    float64
+	image        *ebiten.Image
+	running      bool
+}
+
+func newCrow(name string) *crow {
+	return &crow{
+		name:  name,
+		image: crowImage,
+	}
+}
 
 func Init() {
 	kf, err := os.Open("./assets/img/カラス.png")
@@ -52,24 +57,29 @@ func Init() {
 		log.Fatalf("%+v\n", e)
 	}
 	crowImage = ebiten.NewImageFromImage(ki)
+
+	crowA = newCrow("A")
+	crowB = newCrow("B")
+	crowC = newCrow("C")
+	crowD = newCrow("D")
 }
 
 func ImageDraw(screen *ebiten.Image, elapsedTime int) {
 
-	if CrowPositionCountMap["A"]["exec"] == 1 {
-		crowImageDraw("A", screen)
+	if crowA.running {
+		crowA.imageDraw(screen)
 	}
 
-	if CrowPositionCountMap["B"]["exec"] == 1 {
-		crowImageDraw("B", screen)
+	if crowB.running {
+		crowB.imageDraw(screen)
 	}
 
-	if CrowPositionCountMap["C"]["exec"] == 1 {
-		crowImageDraw("C", screen)
+	if crowC.running {
+		crowC.imageDraw(screen)
 	}
 
-	if CrowPositionCountMap["D"]["exec"] == 1 {
-		crowImageDraw("D", screen)
+	if crowD.running {
+		crowD.imageDraw(screen)
 	}
 
 	if elapsedTime%60 == 0 && elapsedTime/60%3 == 0 {
@@ -80,52 +90,51 @@ func ImageDraw(screen *ebiten.Image, elapsedTime int) {
 		// 移動スピードは 8 ~ 2の間
 		cs := rand.Intn(8-1) + 1
 
-		if CrowPositionCountMap["A"]["exec"] == 0 {
-			CrowPositionCountMap["A"]["exec"] = 1
-			CrowPositionCountMap["A"]["positionY"] = float64(py)
-			CrowPositionCountMap["A"]["countSpeed"] = float64(cs)
+		if !crowA.running {
+			crowA.running = true
+			crowA.positionY = float64(py)
+			crowA.moveSpeed = float64(cs)
 			return
 		}
 
-		if CrowPositionCountMap["A"]["exec"] == 1 &&
-			CrowPositionCountMap["B"]["exec"] == 0 {
-			CrowPositionCountMap["B"]["exec"] = 1
-			CrowPositionCountMap["B"]["positionY"] = float64(py)
-			CrowPositionCountMap["B"]["countSpeed"] = float64(cs)
+		if crowA.running &&
+			!crowB.running {
+			crowB.running = true
+			crowB.positionY = float64(py)
+			crowB.moveSpeed = float64(cs)
 			return
 		}
 
-		if CrowPositionCountMap["B"]["exec"] == 1 &&
-			CrowPositionCountMap["C"]["exec"] == 0 {
-			CrowPositionCountMap["C"]["exec"] = 1
-			CrowPositionCountMap["C"]["positionY"] = float64(py)
-			CrowPositionCountMap["C"]["countSpeed"] = float64(cs)
+		if crowB.running &&
+			!crowC.running {
+			crowC.running = true
+			crowC.positionY = float64(py)
+			crowC.moveSpeed = float64(cs)
 			return
 		}
 
-		if CrowPositionCountMap["C"]["exec"] == 1 &&
-			CrowPositionCountMap["D"]["exec"] == 0 {
-			CrowPositionCountMap["D"]["exec"] = 1
-			CrowPositionCountMap["D"]["positionY"] = float64(py)
-			CrowPositionCountMap["D"]["countSpeed"] = float64(cs)
+		if crowC.running &&
+			!crowD.running {
+			crowD.running = true
+			crowD.positionY = float64(py)
+			crowD.moveSpeed = float64(cs)
 			return
 		}
 
-		if CrowPositionCountMap["D"]["exec"] == 1 {
+		if crowD.running {
 			return
 		}
 	}
-
 }
 
-func crowImageDraw(key string, screen *ebiten.Image) bool {
+func (c *crow) imageDraw(screen *ebiten.Image) {
+	// 左に移動
+	c.incrementCrowPositionCount()
 
-	IncrementCrowPositionCount(key)
-
-	if float64(defaultcrowPositionX)-float64(CrowPositionCountMap[key]["count"]) < -160 {
-		CrowPositionCountMap[key]["count"] = 1
-		CrowPositionCountMap[key]["exec"] = 0
-		return false
+	// 画面から消えたか判定
+	if float64(defaultcrowPositionX)-c.moveCountNum < -160 {
+		c.moveCountNum = 1
+		c.running = false
 	}
 
 	op := &ebiten.DrawImageOptions{}
@@ -134,16 +143,14 @@ func crowImageDraw(key string, screen *ebiten.Image) bool {
 	op.GeoM.Scale(crowImageSizeX, crowImageSizeY)
 
 	// カラス画像の位置
-	op.GeoM.Translate(float64(defaultcrowPositionX)-float64(CrowPositionCountMap[key]["count"]), CrowPositionCountMap[key]["positionY"])
+	op.GeoM.Translate(float64(defaultcrowPositionX)-c.moveCountNum, c.positionY)
 
 	// カラス画像描画
 	screen.DrawImage(crowImage, op)
-
-	return true
 }
 
-func IncrementCrowPositionCount(key string) {
-	CrowPositionCountMap[key]["count"] += CrowPositionCountMap[key]["countSpeed"]
+func (c *crow) incrementCrowPositionCount() {
+	c.moveCountNum += c.moveSpeed
 }
 
 // func execNextCrow(key string) bool {
