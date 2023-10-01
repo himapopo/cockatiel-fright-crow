@@ -1,0 +1,43 @@
+package jungle
+
+import (
+	"image"
+	"log"
+	"os"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/xerrors"
+)
+
+var (
+	jungleImage      *ebiten.Image
+	jungleImageSizeX = 1.5
+	jungleImageSizeY = 1.5
+)
+
+func Init() {
+	jf, err := os.Open("./assets/img/ジャングル.png")
+	defer jf.Close()
+	if err != nil {
+		e := xerrors.Errorf("error: %w", err)
+		log.Fatalf("%+v\n", e)
+	}
+	ji, _, err := image.Decode(jf)
+	if err != nil {
+		e := xerrors.Errorf("error: %w", err)
+		log.Fatalf("%+v\n", e)
+	}
+	jungleImage = ebiten.NewImageFromImage(ji)
+}
+
+func ImageDraw(screen *ebiten.Image) {
+	jop := &ebiten.DrawImageOptions{}
+
+	// 背景画像の大きさ
+	jop.GeoM.Scale(jungleImageSizeX, jungleImageSizeY)
+
+	// 背景画像の位置
+	jop.GeoM.Translate(-40, -40)
+
+	screen.DrawImage(jungleImage, jop)
+}
