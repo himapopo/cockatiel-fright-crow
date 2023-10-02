@@ -20,18 +20,18 @@ var (
 
 func Init() {
 	// オカメ画像ファイル
-	of, err := os.Open("./assets/img/えんぴつオカメ.png")
-	defer of.Close()
+	f, err := os.Open("./assets/img/えんぴつオカメ.png")
+	defer f.Close()
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	oi, _, err := image.Decode(of)
+	i, _, err := image.Decode(f)
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	okameImage = ebiten.NewImageFromImage(oi)
+	okameImage = ebiten.NewImageFromImage(i)
 }
 
 func ImageDraw(screen *ebiten.Image) {
