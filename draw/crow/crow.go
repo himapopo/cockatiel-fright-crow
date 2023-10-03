@@ -45,18 +45,18 @@ func newCrow(name string) *crow {
 }
 
 func Init() {
-	kf, err := os.Open("./assets/img/カラス.png")
-	defer kf.Close()
+	f, err := os.Open("./assets/img/カラス.png")
+	defer f.Close()
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	ki, _, err := image.Decode(kf)
+	i, _, err := image.Decode(f)
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	crowImage = ebiten.NewImageFromImage(ki)
+	crowImage = ebiten.NewImageFromImage(i)
 
 	crowA = newCrow("A")
 	crowB = newCrow("B")

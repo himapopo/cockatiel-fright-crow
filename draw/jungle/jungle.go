@@ -16,18 +16,18 @@ var (
 )
 
 func Init() {
-	jf, err := os.Open("./assets/img/ジャングル.png")
-	defer jf.Close()
+	f, err := os.Open("./assets/img/ジャングル.png")
+	defer f.Close()
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	ji, _, err := image.Decode(jf)
+	i, _, err := image.Decode(f)
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	jungleImage = ebiten.NewImageFromImage(ji)
+	jungleImage = ebiten.NewImageFromImage(i)
 }
 
 func ImageDraw(screen *ebiten.Image) {

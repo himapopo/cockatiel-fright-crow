@@ -6,6 +6,7 @@ import (
 	"cockatiel-fright-crow/draw/cockatiel"
 	"cockatiel-fright-crow/draw/crow"
 	"cockatiel-fright-crow/draw/jungle"
+	"cockatiel-fright-crow/draw/start"
 	"cockatiel-fright-crow/game"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -19,6 +20,8 @@ func main() {
 	jungle.Init()
 
 	crow.Init()
+
+	start.Init()
 
 	ebiten.SetWindowSize(game.ScreenWidth*3, game.ScreenHeight*3)
 	ebiten.SetWindowTitle("Cockatiel Fright Crow")

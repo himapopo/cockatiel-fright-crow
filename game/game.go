@@ -4,10 +4,12 @@ import (
 	"cockatiel-fright-crow/draw/cockatiel"
 	"cockatiel-fright-crow/draw/crow"
 	"cockatiel-fright-crow/draw/jungle"
+	"cockatiel-fright-crow/draw/start"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const (
@@ -18,12 +20,22 @@ const (
 
 var (
 	elapsedTime = 1
+
+	RunGame = false
 )
 
 type Game struct{}
 
 func (g *Game) Update() error {
 	elapsedTime++
+
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		RunGame = true
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		RunGame = false
+	}
 	return nil
 }
 
@@ -35,8 +47,15 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// オカメ画像描画
 	cockatiel.ImageDraw(screen)
 
-	// カラス画像描画
-	crow.ImageDraw(screen, elapsedTime)
+	if RunGame {
+		// カラス画像描画
+		crow.ImageDraw(screen, elapsedTime)
+	}
+
+	if !RunGame {
+		// スタート画面画像描画
+		start.ImageDraw(screen)
+	}
 
 	ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))
 }
