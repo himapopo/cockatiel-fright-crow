@@ -1,7 +1,7 @@
 package cockatiel
 
 import (
-	"image"
+	"image/png"
 	"log"
 	"os"
 
@@ -26,7 +26,7 @@ func Init() {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	i, _, err := image.Decode(f)
+	i, err := png.Decode(f)
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)

@@ -5,11 +5,13 @@ import (
 	"cockatiel-fright-crow/draw/crow"
 	"cockatiel-fright-crow/draw/jungle"
 	"cockatiel-fright-crow/draw/start"
+	"cockatiel-fright-crow/update"
 	"strconv"
 
+	"github.com/hajimehoshi/bitmapfont/v3"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 )
 
 const (
@@ -24,7 +26,9 @@ var (
 	RunGame = false
 )
 
-type Game struct{}
+type Game struct {
+	Score *update.GameScore
+}
 
 func (g *Game) Update() error {
 	elapsedTime++
@@ -49,7 +53,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if RunGame {
 		// カラス画像描画
-		crow.ImageDraw(screen, elapsedTime)
+		crow.ImageDraw(screen, elapsedTime, g.Score)
+
+		op := &ebiten.DrawImageOptions{}
+
+		op.GeoM.Translate(4, 12)
+		op.GeoM.Scale(2.5, 2.5)
+
+		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.Score.Score), bitmapfont.Face, op)
 	}
 
 	if !RunGame {
@@ -57,7 +68,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		start.ImageDraw(screen)
 	}
 
-	ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))
+	// ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

@@ -1,7 +1,8 @@
 package crow
 
 import (
-	"image"
+	"cockatiel-fright-crow/update"
+	"image/png"
 	"log"
 	"math/rand"
 	"os"
@@ -51,7 +52,7 @@ func Init() {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	i, _, err := image.Decode(f)
+	i, err := png.Decode(f)
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
@@ -64,22 +65,22 @@ func Init() {
 	crowD = newCrow("D")
 }
 
-func ImageDraw(screen *ebiten.Image, elapsedTime int) {
+func ImageDraw(screen *ebiten.Image, elapsedTime int, score *update.GameScore) {
 
 	if crowA.running {
-		crowA.imageDraw(screen)
+		crowA.imageDraw(screen, score)
 	}
 
 	if crowB.running {
-		crowB.imageDraw(screen)
+		crowB.imageDraw(screen, score)
 	}
 
 	if crowC.running {
-		crowC.imageDraw(screen)
+		crowC.imageDraw(screen, score)
 	}
 
 	if crowD.running {
-		crowD.imageDraw(screen)
+		crowD.imageDraw(screen, score)
 	}
 
 	if elapsedTime%60 == 0 && elapsedTime/60%3 == 0 {
@@ -127,7 +128,7 @@ func ImageDraw(screen *ebiten.Image, elapsedTime int) {
 	}
 }
 
-func (c *crow) imageDraw(screen *ebiten.Image) {
+func (c *crow) imageDraw(screen *ebiten.Image, score *update.GameScore) {
 	// 左に移動
 	c.incrementCrowPositionCount()
 
@@ -135,6 +136,9 @@ func (c *crow) imageDraw(screen *ebiten.Image) {
 	if float64(defaultcrowPositionX)-c.moveCountNum < -160 {
 		c.moveCountNum = 1
 		c.running = false
+
+		// スコアアップ
+		score.ScoreUp()
 	}
 
 	op := &ebiten.DrawImageOptions{}
