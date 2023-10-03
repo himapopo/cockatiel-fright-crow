@@ -17,8 +17,8 @@ var (
 	crowImage *ebiten.Image
 
 	// カラス画像サイズ
-	crowImageSizeX = 0.2
-	crowImageSizeY = 0.2
+	crowImageSizeX = 0.2 // 元の大きさ 800
+	crowImageSizeY = 0.2 // 元の大きさ 773
 
 	// カラスの初期位置
 	defaultcrowPositionX = 960
@@ -45,6 +45,13 @@ func newCrow(name string) *crow {
 	}
 }
 
+func ResetCrows() {
+	crowA = newCrow("A")
+	crowB = newCrow("B")
+	crowC = newCrow("C")
+	crowD = newCrow("D")
+}
+
 func Init() {
 	f, err := os.Open("./assets/img/カラス.png")
 	defer f.Close()
@@ -65,22 +72,22 @@ func Init() {
 	crowD = newCrow("D")
 }
 
-func ImageDraw(screen *ebiten.Image, elapsedTime int, score *update.GameScore) {
+func ImageDraw(screen *ebiten.Image, elapsedTime int, state *update.GameState) {
 
 	if crowA.running {
-		crowA.imageDraw(screen, score)
+		crowA.imageDraw(screen, state)
 	}
 
 	if crowB.running {
-		crowB.imageDraw(screen, score)
+		crowB.imageDraw(screen, state)
 	}
 
 	if crowC.running {
-		crowC.imageDraw(screen, score)
+		crowC.imageDraw(screen, state)
 	}
 
 	if crowD.running {
-		crowD.imageDraw(screen, score)
+		crowD.imageDraw(screen, state)
 	}
 
 	if elapsedTime%60 == 0 && elapsedTime/60%3 == 0 {
@@ -128,17 +135,26 @@ func ImageDraw(screen *ebiten.Image, elapsedTime int, score *update.GameScore) {
 	}
 }
 
-func (c *crow) imageDraw(screen *ebiten.Image, score *update.GameScore) {
+func (c *crow) imageDraw(screen *ebiten.Image, state *update.GameState) {
 	// 左に移動
-	c.incrementCrowPositionCount()
+	if state.State == "run" {
+		c.incrementCrowPositionCount()
+	}
 
-	// 画面から消えたか判定
-	if float64(defaultcrowPositionX)-c.moveCountNum < -160 {
-		c.moveCountNum = 1
-		c.running = false
+	// オカメとカラスの衝突判定
+	if c.conflictValid() {
+		state.GameEnd()
+	}
 
-		// スコアアップ
-		score.ScoreUp()
+	if state.State == "run" {
+		// 画面から消えたか判定
+		if float64(defaultcrowPositionX)-c.moveCountNum < -160 {
+			c.moveCountNum = 1
+			c.running = false
+
+			// スコアアップ
+			state.ScoreUp()
+		}
 	}
 
 	op := &ebiten.DrawImageOptions{}
@@ -155,6 +171,33 @@ func (c *crow) imageDraw(screen *ebiten.Image, score *update.GameScore) {
 
 func (c *crow) incrementCrowPositionCount() {
 	c.moveCountNum += c.moveSpeed
+}
+
+func (c *crow) conflictValid() bool {
+	// オカメの一番左地点, オカメの一番上地点
+	cursolx, cursoly := ebiten.CursorPosition()
+
+	// 745, 784 はオカメ画像の元々大きさ
+	okamePositionX := float64(cursolx) + (745 * 0.15) // オカメの一番右地点
+	okamePositionY := float64(cursoly) + (784 * 0.15) // オカメの一番下地点
+
+	// オカメの一番右地点が カラスの一番左地点を超えているか。 オカメの一番右地点がカラスの右地点より手前か。
+	cockatielRightValid := okamePositionX >= float64(defaultcrowPositionX)-c.moveCountNum && okamePositionX <= float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX)
+
+	// オカメの一番左地点がカラスの一番右地点より手前か。オカメの一番左地点がカラスの左地点を超えているか。
+	cockatielLeftValid := float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX) >= float64(cursolx) && float64(cursolx) >= float64(defaultcrowPositionX)-c.moveCountNum
+
+	// オカメの一番下地点がカラスの一番上地点を超えているか。オカメの下地点が、カラスの下地点より手前か。
+	cockatielBottomValid := okamePositionY >= c.positionY && okamePositionY <= c.positionY+(763*crowImageSizeY)
+
+	// オカメの一番上地点がカラスの一番下地点より手前か。オカメの一番上地点がカラスの一番上地点を超えているか。
+	cockatielTopValid := c.positionY+(763*crowImageSizeY) >= float64(cursoly) && float64(cursoly) >= c.positionY
+
+	// 当たり判定
+	return (cockatielRightValid && (cockatielBottomValid || cockatielTopValid)) ||
+		(cockatielLeftValid && (cockatielBottomValid || cockatielTopValid)) ||
+		(cockatielTopValid && (cockatielRightValid || cockatielLeftValid)) ||
+		(cockatielBottomValid && (cockatielRightValid || cockatielLeftValid))
 }
 
 // func execNextCrow(key string) bool {

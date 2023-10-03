@@ -22,23 +22,29 @@ const (
 
 var (
 	elapsedTime = 1
-
-	RunGame = false
 )
 
 type Game struct {
-	Score *update.GameScore
+	State *update.GameState
 }
 
 func (g *Game) Update() error {
 	elapsedTime++
 
-	if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-		RunGame = true
+	// スタート画面からのみスペースキーでゲーム開始可能
+	if g.State.State == "start" {
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+			g.State.GameRun()
+		}
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
-		RunGame = false
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		// ゲームオーバー表示
+		g.State.GameReStart()
+		// カラスの位置初期化
+		crow.ResetCrows()
+		// オカメの位置初期化
+		cockatiel.ResetEndPosition()
 	}
 	return nil
 }
@@ -49,23 +55,34 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	jungle.ImageDraw(screen)
 
 	// オカメ画像描画
-	cockatiel.ImageDraw(screen)
+	cockatiel.ImageDraw(screen, g.State)
 
-	if RunGame {
+	if g.State.State != "start" {
 		// カラス画像描画
-		crow.ImageDraw(screen, elapsedTime, g.Score)
+		crow.ImageDraw(screen, elapsedTime, g.State)
 
 		op := &ebiten.DrawImageOptions{}
 
 		op.GeoM.Translate(4, 12)
 		op.GeoM.Scale(2.5, 2.5)
 
-		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.Score.Score), bitmapfont.Face, op)
+		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.State.Score), bitmapfont.Face, op)
 	}
 
-	if !RunGame {
-		// スタート画面画像描画
+	// スタート画面
+	if g.State.State == "start" {
 		start.ImageDraw(screen)
+	}
+
+	// ゲームオーバー
+	if g.State.State == "end" {
+
+		op := &ebiten.DrawImageOptions{}
+
+		op.GeoM.Translate(40, 200)
+		op.GeoM.Scale(2.5, 2.5)
+
+		text.DrawWithOptions(screen, "GAME OVER | Score: "+strconv.Itoa(g.State.Score)+" | Press R Key Return Start Page", bitmapfont.Face, op)
 	}
 
 	// ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))

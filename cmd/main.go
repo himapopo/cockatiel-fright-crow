@@ -27,7 +27,7 @@ func main() {
 	ebiten.SetWindowSize(game.ScreenWidth*3, game.ScreenHeight*3)
 	ebiten.SetWindowTitle("Cockatiel Fright Crow")
 	if err := ebiten.RunGame(&game.Game{
-		Score: update.NewGameScore(),
+		State: update.NewGameState(),
 	}); err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
