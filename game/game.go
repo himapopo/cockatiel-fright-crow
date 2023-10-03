@@ -6,7 +6,6 @@ import (
 	"cockatiel-fright-crow/draw/jungle"
 	"cockatiel-fright-crow/draw/start"
 	"cockatiel-fright-crow/update"
-	"image/color"
 	"strconv"
 
 	"github.com/hajimehoshi/bitmapfont/v3"
@@ -56,7 +55,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		// カラス画像描画
 		crow.ImageDraw(screen, elapsedTime, g.Score)
 
-		text.Draw(screen, "Score: "+strconv.Itoa(g.Score.Score), bitmapfont.Face, 4, 12, color.White)
+		op := &ebiten.DrawImageOptions{}
+
+		op.GeoM.Translate(4, 12)
+		op.GeoM.Scale(2.5, 2.5)
+
+		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.Score.Score), bitmapfont.Face, op)
 	}
 
 	if !RunGame {
