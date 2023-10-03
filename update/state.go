@@ -3,13 +3,23 @@ package update
 type GameState struct {
 	Score int
 	State string
+	Level int
 }
 
 func NewGameState() *GameState {
 	return &GameState{
 		Score: 0,
 		State: "start",
+		Level: 1,
 	}
+}
+
+func (gs *GameState) LevelUp() {
+	// レベルマックス8
+	if gs.Level == 8 {
+		return
+	}
+	gs.Level++
 }
 
 func (gs *GameState) ScoreUp() {
@@ -31,4 +41,5 @@ func (gs *GameState) GameStart() {
 func (gs *GameState) GameReStart() {
 	gs.State = "start"
 	gs.Score = 0
+	gs.Level = 1
 }

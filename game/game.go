@@ -66,7 +66,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		op.GeoM.Translate(4, 12)
 		op.GeoM.Scale(2.5, 2.5)
 
-		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.State.Score), bitmapfont.Face, op)
+		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level), bitmapfont.Face, op)
 	}
 
 	// スタート画面
@@ -78,11 +78,19 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.State.State == "end" {
 
 		op := &ebiten.DrawImageOptions{}
-
-		op.GeoM.Translate(40, 200)
+		op.GeoM.Translate(160, 200)
 		op.GeoM.Scale(2.5, 2.5)
+		text.DrawWithOptions(screen, "GAME OVER", bitmapfont.Face, op)
 
-		text.DrawWithOptions(screen, "GAME OVER | Score: "+strconv.Itoa(g.State.Score)+" | Press R Key Return Start Page", bitmapfont.Face, op)
+		op = &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(130, 230)
+		op.GeoM.Scale(2.5, 2.5)
+		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level), bitmapfont.Face, op)
+
+		op = &ebiten.DrawImageOptions{}
+		op.GeoM.Translate(110, 260)
+		op.GeoM.Scale(2.5, 2.5)
+		text.DrawWithOptions(screen, "Press R Key Return Start Page", bitmapfont.Face, op)
 	}
 
 	// ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))

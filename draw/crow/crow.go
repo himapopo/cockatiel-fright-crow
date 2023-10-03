@@ -27,6 +27,10 @@ var (
 	crowB *crow
 	crowC *crow
 	crowD *crow
+	crowE *crow
+	crowF *crow
+	crowG *crow
+	crowH *crow
 )
 
 type crow struct {
@@ -50,6 +54,10 @@ func ResetCrows() {
 	crowB = newCrow("B")
 	crowC = newCrow("C")
 	crowD = newCrow("D")
+	crowE = newCrow("E")
+	crowF = newCrow("F")
+	crowG = newCrow("G")
+	crowH = newCrow("H")
 }
 
 func Init() {
@@ -70,6 +78,10 @@ func Init() {
 	crowB = newCrow("B")
 	crowC = newCrow("C")
 	crowD = newCrow("D")
+	crowE = newCrow("E")
+	crowF = newCrow("F")
+	crowG = newCrow("G")
+	crowH = newCrow("H")
 }
 
 func ImageDraw(screen *ebiten.Image, elapsedTime int, state *update.GameState) {
@@ -90,13 +102,76 @@ func ImageDraw(screen *ebiten.Image, elapsedTime int, state *update.GameState) {
 		crowD.imageDraw(screen, state)
 	}
 
-	if elapsedTime%60 == 0 && elapsedTime/60%3 == 0 {
+	if state.Level > 1 && crowE.running {
+		crowE.imageDraw(screen, state)
+	}
+
+	if state.Level > 2 && crowF.running {
+		crowF.imageDraw(screen, state)
+	}
+
+	if state.Level > 3 && crowG.running {
+		crowG.imageDraw(screen, state)
+	}
+
+	if state.Level > 4 && crowH.running {
+		crowH.imageDraw(screen, state)
+	}
+
+	// カラス出現頻度 最初は3秒ごと
+	frequently := 3
+	// カラス最高スピード
+	maxSpeed := 5
+	// カラス最低スピード
+	minSpeed := 1
+
+	frequentlySec := 60
+
+	if state.Level > 1 {
+		frequently = 2
+	}
+
+	if state.Level > 2 {
+		frequently = 2
+		maxSpeed = 7
+	}
+
+	if state.Level > 3 {
+		frequently = 2
+		maxSpeed = 9
+	}
+
+	if state.Level > 4 {
+		frequently = 1
+		maxSpeed = 11
+		frequentlySec = 80
+	}
+
+	if state.Level > 5 {
+		frequently = 1
+		maxSpeed = 11
+		frequentlySec = 60
+	}
+
+	if state.Level > 6 {
+		frequently = 1
+		maxSpeed = 11
+		frequentlySec = 25
+	}
+
+	if state.Level > 7 {
+		frequently = 1
+		maxSpeed = 11
+		frequentlySec = 10
+	}
+
+	if elapsedTime%frequentlySec == 0 && elapsedTime/frequentlySec%frequently == 0 {
 		rand.New(rand.NewSource(time.Now().UnixNano()))
 		// Y軸のマックス値
 		py := rand.Intn(500)
 
 		// 移動スピードは 8 ~ 2の間
-		cs := rand.Intn(8-1) + 1
+		cs := rand.Intn(maxSpeed-minSpeed) + minSpeed
 
 		if !crowA.running {
 			crowA.running = true
@@ -129,7 +204,39 @@ func ImageDraw(screen *ebiten.Image, elapsedTime int, state *update.GameState) {
 			return
 		}
 
-		if crowD.running {
+		if state.Level > 1 &&
+			crowD.running &&
+			!crowE.running {
+			crowE.running = true
+			crowE.positionY = float64(py)
+			crowE.moveSpeed = float64(cs)
+			return
+		}
+
+		if state.Level > 3 &&
+			crowE.running &&
+			!crowF.running {
+			crowF.running = true
+			crowF.positionY = float64(py)
+			crowF.moveSpeed = float64(cs)
+			return
+		}
+
+		if state.Level > 5 &&
+			crowF.running &&
+			!crowG.running {
+			crowG.running = true
+			crowG.positionY = float64(py)
+			crowG.moveSpeed = float64(cs)
+			return
+		}
+
+		if state.Level > 7 &&
+			crowG.running &&
+			!crowH.running {
+			crowH.running = true
+			crowH.positionY = float64(py)
+			crowH.moveSpeed = float64(cs)
 			return
 		}
 	}
@@ -154,6 +261,11 @@ func (c *crow) imageDraw(screen *ebiten.Image, state *update.GameState) {
 
 			// スコアアップ
 			state.ScoreUp()
+
+			// 10匹ずつでレベルアップ
+			if state.Score%5 == 0 {
+				state.LevelUp()
+			}
 		}
 	}
 
