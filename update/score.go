@@ -10,6 +10,6 @@ func NewGameScore() *GameScore {
 	}
 }
 
-func (gs *GameScore) CountUp() {
+func (gs *GameScore) ScoreUp() {
 	gs.Score++
 }

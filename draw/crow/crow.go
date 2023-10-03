@@ -138,7 +138,7 @@ func (c *crow) imageDraw(screen *ebiten.Image, score *update.GameScore) {
 		c.running = false
 
 		// スコアアップ
-		score.CountUp()
+		score.ScoreUp()
 	}
 
 	op := &ebiten.DrawImageOptions{}
