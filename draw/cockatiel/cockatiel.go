@@ -15,8 +15,8 @@ var (
 	// オカメ画像
 	okameImage *ebiten.Image
 
-	okameImageSizeX = 0.15 // 元の大きさ 745
-	okameImageSizeY = 0.15 // 元の大きさ 784
+	okameImageSizeX = 0.08 // 元の大きさ 745
+	okameImageSizeY = 0.08 // 元の大きさ 784
 
 	endPositionX float64 = 0
 	endPositionY float64 = 0
@@ -50,17 +50,37 @@ func ImageDraw(screen *ebiten.Image, state *update.GameState) {
 	// カーソルの位置
 	cursorX, cursorY := ebiten.CursorPosition()
 
+	positionX = float64(cursorX)
+	positionY = float64(cursorY)
+
+	// --------画面からはみ出ない設定---------
+
+	if positionX <= 0 {
+		positionX = 0
+	}
+
+	if positionX >= (960 - (784 * 0.08)) {
+		positionX = 960 - (784 * 0.08)
+	}
+
+	if positionY <= 0 {
+		positionY = 0
+	}
+
+	if positionY >= (720 - (745 * 0.08)) {
+		positionY = 720 - (745 * 0.08)
+	}
+
+	// --------画面からはみ出ない設定---------
+
 	if state.State == "end" && endPositionX == 0 && endPositionY == 0 {
-		endPositionX = float64(cursorX)
-		endPositionY = float64(cursorY)
+		endPositionX = positionX
+		endPositionY = positionY
 	}
 
 	if endPositionX != 0 && endPositionY != 0 {
 		positionX = endPositionX
 		positionY = endPositionY
-	} else {
-		positionX = float64(cursorX)
-		positionY = float64(cursorY)
 	}
 
 	oop := &ebiten.DrawImageOptions{}

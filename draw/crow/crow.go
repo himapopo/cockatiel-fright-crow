@@ -168,7 +168,7 @@ func ImageDraw(screen *ebiten.Image, elapsedTime int, state *update.GameState) {
 	if elapsedTime%frequentlySec == 0 && elapsedTime/frequentlySec%frequently == 0 {
 		rand.New(rand.NewSource(time.Now().UnixNano()))
 		// Y軸のマックス値
-		py := rand.Intn(500)
+		py := rand.Intn(550)
 
 		// 移動スピードは 8 ~ 2の間
 		cs := rand.Intn(maxSpeed-minSpeed) + minSpeed
@@ -286,24 +286,50 @@ func (c *crow) incrementCrowPositionCount() {
 }
 
 func (c *crow) conflictValid() bool {
+
+	// --------オカメが画面からはみ出ない設定---------
+	var cpl float64 = 0
+	var cpt float64 = 0
+
 	// オカメの一番左地点, オカメの一番上地点
 	cursolx, cursoly := ebiten.CursorPosition()
 
+	cpl = float64(cursolx)
+	cpt = float64(cursoly)
+
+	if cpl <= 0 {
+		cpl = 0
+	}
+
+	if cpl >= (960 - (784 * 0.08)) {
+		cpl = 960 - (784 * 0.08)
+	}
+
+	if cpt <= 0 {
+		cpt = 0
+	}
+
+	if cpt >= (720 - (745 * 0.08)) {
+		cpt = 720 - (745 * 0.08)
+	}
+
 	// 745, 784 はオカメ画像の元々大きさ
-	okamePositionX := float64(cursolx) + (745 * 0.15) // オカメの一番右地点
-	okamePositionY := float64(cursoly) + (784 * 0.15) // オカメの一番下地点
+	cpr := cpl + (745 * 0.08) // オカメの一番右地点
+	cpb := cpt + (784 * 0.08) // オカメの一番下地点
+
+	// --------オカメが画面からはみ出ない設定---------
 
 	// オカメの一番右地点が カラスの一番左地点を超えているか。 オカメの一番右地点がカラスの右地点より手前か。
-	cockatielRightValid := okamePositionX >= float64(defaultcrowPositionX)-c.moveCountNum && okamePositionX <= float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX)
+	cockatielRightValid := cpr >= float64(defaultcrowPositionX)-c.moveCountNum && cpr <= float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX)
 
 	// オカメの一番左地点がカラスの一番右地点より手前か。オカメの一番左地点がカラスの左地点を超えているか。
-	cockatielLeftValid := float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX) >= float64(cursolx) && float64(cursolx) >= float64(defaultcrowPositionX)-c.moveCountNum
+	cockatielLeftValid := float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX) >= cpl && cpl >= float64(defaultcrowPositionX)-c.moveCountNum
 
 	// オカメの一番下地点がカラスの一番上地点を超えているか。オカメの下地点が、カラスの下地点より手前か。
-	cockatielBottomValid := okamePositionY >= c.positionY && okamePositionY <= c.positionY+(763*crowImageSizeY)
+	cockatielBottomValid := cpb >= c.positionY && cpb <= c.positionY+(763*crowImageSizeY)
 
 	// オカメの一番上地点がカラスの一番下地点より手前か。オカメの一番上地点がカラスの一番上地点を超えているか。
-	cockatielTopValid := c.positionY+(763*crowImageSizeY) >= float64(cursoly) && float64(cursoly) >= c.positionY
+	cockatielTopValid := c.positionY+(763*crowImageSizeY) >= cpt && cpt >= c.positionY
 
 	// 当たり判定
 	return (cockatielRightValid && (cockatielBottomValid || cockatielTopValid)) ||
