@@ -1,3 +1,8 @@
+# github.com/ebitengine/oto/v3 v3.1.0
+## explicit; go 1.18
+github.com/ebitengine/oto/v3
+github.com/ebitengine/oto/v3/internal/mux
+github.com/ebitengine/oto/v3/internal/oboe
 # github.com/ebitengine/purego v0.5.0
 ## explicit; go 1.18
 github.com/ebitengine/purego
@@ -13,7 +18,10 @@ github.com/hajimehoshi/bitmapfont/v3/internal/unicode
 # github.com/hajimehoshi/ebiten/v2 v2.6.0
 ## explicit; go 1.18
 github.com/hajimehoshi/ebiten/v2
-github.com/hajimehoshi/ebiten/v2/ebitenutil
+github.com/hajimehoshi/ebiten/v2/audio
+github.com/hajimehoshi/ebiten/v2/audio/internal/convert
+github.com/hajimehoshi/ebiten/v2/audio/wav
+github.com/hajimehoshi/ebiten/v2/examples/resources/audio
 github.com/hajimehoshi/ebiten/v2/inpututil
 github.com/hajimehoshi/ebiten/v2/internal/affine
 github.com/hajimehoshi/ebiten/v2/internal/atlas
@@ -56,7 +64,17 @@ github.com/hajimehoshi/ebiten/v2/internal/ui
 github.com/hajimehoshi/ebiten/v2/internal/vibrate
 github.com/hajimehoshi/ebiten/v2/internal/winver
 github.com/hajimehoshi/ebiten/v2/text
-github.com/hajimehoshi/ebiten/v2/vector
+# github.com/hajimehoshi/go-mp3 v0.3.4
+## explicit; go 1.14
+github.com/hajimehoshi/go-mp3
+github.com/hajimehoshi/go-mp3/internal/bits
+github.com/hajimehoshi/go-mp3/internal/consts
+github.com/hajimehoshi/go-mp3/internal/frame
+github.com/hajimehoshi/go-mp3/internal/frameheader
+github.com/hajimehoshi/go-mp3/internal/huffman
+github.com/hajimehoshi/go-mp3/internal/imdct
+github.com/hajimehoshi/go-mp3/internal/maindata
+github.com/hajimehoshi/go-mp3/internal/sideinfo
 # github.com/jezek/xgb v1.1.0
 ## explicit; go 1.11
 github.com/jezek/xgb
