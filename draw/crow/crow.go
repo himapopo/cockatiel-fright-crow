@@ -249,7 +249,7 @@ func (c *crow) imageDraw(screen *ebiten.Image, state *update.GameState) {
 	}
 
 	// オカメとカラスの衝突判定
-	if c.conflictValid() {
+	if state.State == "run" && c.conflictValid() {
 		state.GameEnd()
 	}
 

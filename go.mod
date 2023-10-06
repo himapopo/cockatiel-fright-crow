@@ -3,8 +3,10 @@ module cockatiel-fright-crow
 go 1.21.1
 
 require (
+	github.com/ebitengine/oto/v3 v3.1.0
 	github.com/hajimehoshi/bitmapfont/v3 v3.0.0
 	github.com/hajimehoshi/ebiten/v2 v2.6.0
+	github.com/hajimehoshi/go-mp3 v0.3.4
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 )
 
