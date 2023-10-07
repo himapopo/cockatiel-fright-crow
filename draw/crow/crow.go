@@ -22,6 +22,8 @@ type Crows struct {
 	crowF *crow
 	crowG *crow
 	crowH *crow
+	crowI *crow
+	rare  *crow // レアキャラ。実はオカメ。
 }
 
 var (
@@ -36,12 +38,21 @@ var (
 )
 
 func NewCrows() *Crows {
+	// カラス画像
 	i, err := png.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
 	crowImage := ebiten.NewImageFromImage(i)
+
+	// レアキャラ画像
+	i, err = png.Decode(bytes.NewReader(rareImageByte))
+	if err != nil {
+		e := xerrors.Errorf("error: %w", err)
+		log.Fatalf("%+v\n", e)
+	}
+	rareImage := ebiten.NewImageFromImage(i)
 
 	return &Crows{
 		crowA: newCrow("A", crowImage),
@@ -52,6 +63,8 @@ func NewCrows() *Crows {
 		crowF: newCrow("F", crowImage),
 		crowG: newCrow("G", crowImage),
 		crowH: newCrow("H", crowImage),
+		crowI: newCrow("I", crowImage),
+		rare:  newCrow("rare", rareImage),
 	}
 }
 
@@ -113,6 +126,10 @@ func (c *Crows) ImageDraw(screen *ebiten.Image, g *game.Game) {
 		c.runCrow(g)
 	}
 
+	if c.rare.run {
+		c.rare.imageDraw(screen, g)
+	}
+
 	if c.crowA.run {
 		c.crowA.imageDraw(screen, g)
 	}
@@ -133,16 +150,20 @@ func (c *Crows) ImageDraw(screen *ebiten.Image, g *game.Game) {
 		c.crowE.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 2 && c.crowF.run {
+	if g.State.Level > 3 && c.crowF.run {
 		c.crowF.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 3 && c.crowG.run {
+	if g.State.Level > 5 && c.crowG.run {
 		c.crowG.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 4 && c.crowH.run {
+	if g.State.Level > 7 && c.crowH.run {
 		c.crowH.imageDraw(screen, g)
+	}
+
+	if g.State.Level > 9 && c.crowH.run {
+		c.crowI.imageDraw(screen, g)
 	}
 }
 
@@ -159,35 +180,49 @@ func (c *Crows) changeCrowSpec(g *game.Game) {
 	if g.State.Level > 2 {
 		frequently = 2
 		maxSpeed = 7
+		frequentlySec = 55
 	}
 
 	if g.State.Level > 3 {
 		frequently = 2
 		maxSpeed = 9
+		frequentlySec = 50
 	}
 
 	if g.State.Level > 4 {
 		frequently = 1
 		maxSpeed = 11
-		frequentlySec = 80
+		frequentlySec = 45
 	}
 
 	if g.State.Level > 5 {
 		frequently = 1
 		maxSpeed = 11
-		frequentlySec = 60
+		frequentlySec = 40
 	}
 
 	if g.State.Level > 6 {
 		frequently = 1
 		maxSpeed = 11
-		frequentlySec = 25
+		frequentlySec = 30
 	}
 
 	if g.State.Level > 7 {
 		frequently = 1
-		maxSpeed = 11
+		maxSpeed = 12
+		frequentlySec = 20
+	}
+
+	if g.State.Level > 8 {
+		frequently = 1
+		maxSpeed = 13
 		frequentlySec = 10
+	}
+
+	if g.State.Level > 9 {
+		frequently = 1
+		maxSpeed = 14
+		frequentlySec = 5
 	}
 }
 
@@ -201,6 +236,18 @@ func (c *Crows) runCrow(g *game.Game) {
 
 	// 移動スピードは 8 ~ 2の間
 	cs := rand.Intn(maxSpeed-minSpeed) + minSpeed
+
+	// レベル5以上からレアキャラ出現
+	if g.State.Level > 4 {
+		rand.New(rand.NewSource(time.Now().UnixNano()))
+		rareNum := rand.Intn(500)
+		if rareNum == 250 && !c.rare.run {
+			c.rare.run = true
+			c.rare.cpy = float64(py)
+			c.rare.moveSpeed = float64(cs)
+			return
+		}
+	}
 
 	if !c.crowA.run {
 		c.crowA.run = true
@@ -266,6 +313,15 @@ func (c *Crows) runCrow(g *game.Game) {
 		c.crowH.run = true
 		c.crowH.cpy = float64(py)
 		c.crowH.moveSpeed = float64(cs)
+		return
+	}
+
+	if g.State.Level > 9 &&
+		c.crowH.run &&
+		!c.crowI.run {
+		c.crowI.run = true
+		c.crowI.cpy = float64(py)
+		c.crowI.moveSpeed = float64(cs)
 		return
 	}
 }

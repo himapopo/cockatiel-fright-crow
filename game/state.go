@@ -15,8 +15,8 @@ func NewGameState() *GameState {
 }
 
 func (gs *GameState) LevelUp() {
-	// レベルマックス8
-	if gs.Level == 8 {
+	// レベルマックス10
+	if gs.Level == 10 {
 		return
 	}
 	gs.Level++
