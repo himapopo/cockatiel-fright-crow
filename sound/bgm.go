@@ -2,7 +2,6 @@ package sound
 
 import (
 	"bytes"
-	"os"
 	"time"
 
 	"github.com/ebitengine/oto/v3"
@@ -15,12 +14,7 @@ type BgmPlayer struct {
 }
 
 func NewBgmPlayer(ac *AudioContext) *BgmPlayer {
-	fileBytes, err := os.ReadFile("./bgm/追いかけっこキャッハー.mp3")
-	if err != nil {
-		panic("reading my-file.mp3 failed: " + err.Error())
-	}
-
-	decodedMp3, err := mp3.NewDecoder(bytes.NewReader(fileBytes))
+	decodedMp3, err := mp3.NewDecoder(bytes.NewReader(bgmByte))
 	if err != nil {
 		panic("mp3.NewDecoder failed: " + err.Error())
 	}

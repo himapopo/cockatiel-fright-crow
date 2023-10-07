@@ -1,10 +1,10 @@
 package cockatiel
 
 import (
+	"bytes"
 	"cockatiel-fright-crow/game"
 	"image/png"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/xerrors"
@@ -34,13 +34,13 @@ type Cockatiel struct {
 func NewCockatiel() *Cockatiel {
 
 	// オカメ画像ファイル
-	f, err := os.Open("./assets/img/えんぴつオカメ.png")
-	defer f.Close()
-	if err != nil {
-		e := xerrors.Errorf("error: %w", err)
-		log.Fatalf("%+v\n", e)
-	}
-	i, err := png.Decode(f)
+	// b, err := os.ReadFile("./assets/img/えんぴつオカメ.png")
+	// if err != nil {
+	// 	e := xerrors.Errorf("error: %w", err)
+	// 	log.Fatalf("%+v\n", e)
+	// }
+
+	i, err := png.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)

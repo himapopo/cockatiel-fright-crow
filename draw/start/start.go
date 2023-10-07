@@ -1,9 +1,9 @@
 package start
 
 import (
+	"bytes"
 	"image/jpeg"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/xerrors"
@@ -16,13 +16,7 @@ type Start struct {
 }
 
 func NewStart() *Start {
-	f, err := os.Open("./assets/img/スタート.jpg")
-	defer f.Close()
-	if err != nil {
-		e := xerrors.Errorf("error: %w", err)
-		log.Fatalf("%+v\n", e)
-	}
-	i, err := jpeg.Decode(f)
+	i, err := jpeg.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
