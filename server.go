@@ -20,8 +20,13 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func healthcheck(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte(`{"message":"ok"}`))
+}
+
 func main() {
-	http.HandleFunc("/view/", viewHandler)
+	http.HandleFunc("/", viewHandler)
+	http.HandleFunc("/healthcheck", healthcheck)
 
 	// viewsに格納したファイルを全て公開
 	http.Handle("/views/", http.FileServer(http.FS(views)))
