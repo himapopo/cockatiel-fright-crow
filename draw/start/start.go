@@ -9,11 +9,13 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var (
-	startImage *ebiten.Image
-)
+type Start struct {
+	image       *ebiten.Image
+	imageWidth  float64
+	imageHeight float64
+}
 
-func Init() {
+func NewStart() *Start {
 	f, err := os.Open("./assets/img/スタート.jpg")
 	defer f.Close()
 	if err != nil {
@@ -25,14 +27,20 @@ func Init() {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	startImage = ebiten.NewImageFromImage(i)
+	startImage := ebiten.NewImageFromImage(i)
+
+	return &Start{
+		image:       startImage,
+		imageWidth:  0.95,
+		imageHeight: 0.88,
+	}
 }
 
-func ImageDraw(screen *ebiten.Image) {
+func (s *Start) ImageDraw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 
 	// トップ画像の大きさ
-	op.GeoM.Scale(0.95, 0.88)
+	op.GeoM.Scale(s.imageWidth, s.imageHeight)
 
-	screen.DrawImage(startImage, op)
+	screen.DrawImage(s.image, op)
 }
