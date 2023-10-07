@@ -1,11 +1,6 @@
 package game
 
 import (
-	"cockatiel-fright-crow/draw/cockatiel"
-	"cockatiel-fright-crow/draw/crow"
-	"cockatiel-fright-crow/draw/jungle"
-	"cockatiel-fright-crow/draw/start"
-	"cockatiel-fright-crow/update"
 	"strconv"
 
 	"github.com/hajimehoshi/bitmapfont/v3"
@@ -16,20 +11,52 @@ import (
 
 const (
 	// スクリーンサイズ
-	ScreenWidth  = 320 // 960
-	ScreenHeight = 240 // 720
+	ScreenWidth  = 960
+	ScreenHeight = 720
 )
 
 var (
-	elapsedTime = 1
+	CallCount = 1
 )
 
+type HitPlayer interface {
+	Play()
+}
+
+type Start interface {
+	ImageDraw(creen *ebiten.Image)
+}
+
+type Jungle interface {
+	ImageDraw(creen *ebiten.Image)
+}
+
+type Cockatiel interface {
+	ImageDraw(creen *ebiten.Image, state *Game)
+	Reset()
+}
+
+type Crows interface {
+	ImageDraw(creen *ebiten.Image, game *Game)
+	Reset()
+}
+
 type Game struct {
-	State *update.GameState
+	Start          Start
+	JungleImage    Jungle
+	CockatielImage Cockatiel
+	Crows          Crows
+
+	HitPlayer HitPlayer
+	State     *GameState
 }
 
 func (g *Game) Update() error {
-	elapsedTime++
+	CallCount++
+	// CallCountが永遠増えないように
+	if CallCount%60 == 0 && CallCount == 101 {
+		CallCount = 1
+	}
 
 	// スタート画面からのみスペースキーでゲーム開始可能
 	if g.State.State == "start" {
@@ -42,9 +69,9 @@ func (g *Game) Update() error {
 		// ゲームオーバー表示
 		g.State.GameReStart()
 		// カラスの位置初期化
-		crow.ResetCrows()
+		g.Crows.Reset()
 		// オカメの位置初期化
-		cockatiel.ResetEndPosition()
+		g.CockatielImage.Reset()
 	}
 	return nil
 }
@@ -52,50 +79,43 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 
 	// 背景画像描画
-	jungle.ImageDraw(screen)
+	g.JungleImage.ImageDraw(screen)
 
 	// オカメ画像描画
-	cockatiel.ImageDraw(screen, g.State)
+	g.CockatielImage.ImageDraw(screen, g)
 
 	if g.State.State != "start" {
 		// カラス画像描画
-		crow.ImageDraw(screen, elapsedTime, g.State)
+		g.Crows.ImageDraw(screen, g)
 
-		op := &ebiten.DrawImageOptions{}
-
-		op.GeoM.Translate(4, 12)
-		op.GeoM.Scale(2.5, 2.5)
-
-		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level), bitmapfont.Face, op)
+		g.textDraw(screen, 4, 12, 2.5, 2.5, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level))
 	}
 
 	// スタート画面
 	if g.State.State == "start" {
-		start.ImageDraw(screen)
+		g.Start.ImageDraw(screen)
 	}
 
 	// ゲームオーバー
 	if g.State.State == "end" {
 
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(160, 200)
-		op.GeoM.Scale(2.5, 2.5)
-		text.DrawWithOptions(screen, "GAME OVER", bitmapfont.Face, op)
+		g.textDraw(screen, 160, 200, 2.5, 2.5, "GAME OVER")
 
-		op = &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(130, 230)
-		op.GeoM.Scale(2.5, 2.5)
-		text.DrawWithOptions(screen, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level), bitmapfont.Face, op)
+		g.textDraw(screen, 130, 230, 2.5, 2.5, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level))
 
-		op = &ebiten.DrawImageOptions{}
-		op.GeoM.Translate(110, 260)
-		op.GeoM.Scale(2.5, 2.5)
-		text.DrawWithOptions(screen, "Press R Key Return Start Page", bitmapfont.Face, op)
+		g.textDraw(screen, 110, 260, 2.5, 2.5, "Press R Key Return Start Page")
 	}
 
 	// ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return ScreenWidth * 3, ScreenHeight * 3
+	return ScreenWidth, ScreenHeight
+}
+
+func (g *Game) textDraw(screen *ebiten.Image, tx, ty, sx, sy float64, msg string) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(tx, ty)
+	op.GeoM.Scale(sx, sy)
+	text.DrawWithOptions(screen, msg, bitmapfont.Face, op)
 }

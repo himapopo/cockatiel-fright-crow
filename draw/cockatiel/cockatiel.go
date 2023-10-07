@@ -1,7 +1,7 @@
 package cockatiel
 
 import (
-	"cockatiel-fright-crow/update"
+	"cockatiel-fright-crow/game"
 	"image/png"
 	"log"
 	"os"
@@ -10,24 +10,29 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var (
-
-	// オカメ画像
-	okameImage *ebiten.Image
-
-	okameImageSizeX = 0.08 // 元の大きさ 745
-	okameImageSizeY = 0.08 // 元の大きさ 784
-
-	endPositionX float64 = 0
-	endPositionY float64 = 0
+const (
+	DefaultX    = 784
+	DefautlY    = 745
+	ImageWidth  = 0.08
+	ImageHeight = 0.08
 )
 
-func ResetEndPosition() {
-	endPositionX = 0
-	endPositionY = 0
+type Cockatiel struct {
+	image       *ebiten.Image
+	imageWidth  float64
+	imageHeight float64
+
+	// endPosition
+	epx float64
+	epy float64
+
+	// currentPosition
+	cpx float64
+	cpy float64
 }
 
-func Init() {
+func NewCockatiel() *Cockatiel {
+
 	// オカメ画像ファイル
 	f, err := os.Open("./assets/img/えんぴつオカメ.png")
 	defer f.Close()
@@ -40,57 +45,81 @@ func Init() {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	okameImage = ebiten.NewImageFromImage(i)
+	cockatielImage := ebiten.NewImageFromImage(i)
+
+	return &Cockatiel{
+		image:       cockatielImage,
+		imageWidth:  0.08,
+		imageHeight: 0.08,
+		epx:         0,
+		epy:         0,
+		cpx:         0,
+		cpy:         0,
+	}
 }
 
-func ImageDraw(screen *ebiten.Image, state *update.GameState) {
+func (c *Cockatiel) Reset() {
+	c.epx = 0
+	c.epy = 0
+}
 
-	var positionX float64 = 0
-	var positionY float64 = 0
-	// カーソルの位置
-	cursorX, cursorY := ebiten.CursorPosition()
+func (c *Cockatiel) ImageDraw(screen *ebiten.Image, g *game.Game) {
+	c.cpx, c.cpy = CurrentPosition()
 
-	positionX = float64(cursorX)
-	positionY = float64(cursorY)
-
-	// --------画面からはみ出ない設定---------
-
-	if positionX <= 0 {
-		positionX = 0
+	// ゲームオーバーした場所を保存
+	if g.State.State == "end" && c.epx == 0 && c.epy == 0 {
+		c.epx = c.cpx
+		c.epy = c.cpy
 	}
 
-	if positionX >= (960 - (784 * 0.08)) {
-		positionX = 960 - (784 * 0.08)
-	}
-
-	if positionY <= 0 {
-		positionY = 0
-	}
-
-	if positionY >= (720 - (745 * 0.08)) {
-		positionY = 720 - (745 * 0.08)
-	}
-
-	// --------画面からはみ出ない設定---------
-
-	if state.State == "end" && endPositionX == 0 && endPositionY == 0 {
-		endPositionX = positionX
-		endPositionY = positionY
-	}
-
-	if endPositionX != 0 && endPositionY != 0 {
-		positionX = endPositionX
-		positionY = endPositionY
+	// ゲームオーバーした場所が登録されている場合は固定
+	if c.epx != 0 && c.epy != 0 {
+		c.cpx = c.epx
+		c.cpy = c.epy
 	}
 
 	oop := &ebiten.DrawImageOptions{}
 
 	// オカメ画像の大きさ
-	oop.GeoM.Scale(okameImageSizeX, okameImageSizeY)
+	oop.GeoM.Scale(c.imageWidth, c.imageHeight)
 
 	// オカメ画像の位置
-	oop.GeoM.Translate(positionX, positionY)
+	oop.GeoM.Translate(c.cpx, c.cpy)
 
 	// オカメ画像描画
-	screen.DrawImage(okameImage, oop)
+	screen.DrawImage(c.image, oop)
+}
+
+// オカメの現在地
+func CurrentPosition() (float64, float64) {
+
+	cursorX, cursorY := ebiten.CursorPosition()
+
+	var cpx float64 = 0
+	var cpy float64 = 0
+
+	cpx = float64(cursorX)
+	cpy = float64(cursorY)
+
+	// --------画面からはみ出ない設定---------
+
+	if cpx <= 0 {
+		cpx = 0
+	}
+
+	if cpx >= (game.ScreenWidth - (DefaultX * ImageWidth)) {
+		cpx = game.ScreenWidth - (DefaultX * ImageWidth)
+	}
+
+	if cpy <= 0 {
+		cpy = 0
+	}
+
+	if cpy >= (game.ScreenHeight - (DefautlY * ImageHeight)) {
+		cpy = game.ScreenHeight - (DefautlY * ImageHeight)
+	}
+
+	// --------画面からはみ出ない設定---------
+
+	return cpx, cpy
 }

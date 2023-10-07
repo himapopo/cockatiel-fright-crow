@@ -9,13 +9,16 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var (
-	jungleImage      *ebiten.Image
-	jungleImageSizeX = 1.5
-	jungleImageSizeY = 1.5
-)
+type Jungle struct {
+	image       *ebiten.Image
+	imageWidth  float64
+	imageHeight float64
+	tx          float64
+	ty          float64
+}
 
-func Init() {
+func NewJungle() *Jungle {
+
 	f, err := os.Open("./assets/img/ジャングル.png")
 	defer f.Close()
 	if err != nil {
@@ -27,17 +30,25 @@ func Init() {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	jungleImage = ebiten.NewImageFromImage(i)
+	jungleImage := ebiten.NewImageFromImage(i)
+
+	return &Jungle{
+		image:       jungleImage,
+		imageWidth:  1.5,
+		imageHeight: 1.5,
+		tx:          -40,
+		ty:          -40,
+	}
 }
 
-func ImageDraw(screen *ebiten.Image) {
-	jop := &ebiten.DrawImageOptions{}
+func (j *Jungle) ImageDraw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
 
 	// 背景画像の大きさ
-	jop.GeoM.Scale(jungleImageSizeX, jungleImageSizeY)
+	op.GeoM.Scale(j.imageWidth, j.imageHeight)
 
 	// 背景画像の位置
-	jop.GeoM.Translate(-40, -40)
+	op.GeoM.Translate(j.tx, j.ty)
 
-	screen.DrawImage(jungleImage, jop)
+	screen.DrawImage(j.image, op)
 }

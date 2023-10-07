@@ -1,7 +1,8 @@
 package crow
 
 import (
-	"cockatiel-fright-crow/update"
+	"cockatiel-fright-crow/draw/cockatiel"
+	"cockatiel-fright-crow/game"
 	"image/png"
 	"log"
 	"math/rand"
@@ -12,17 +13,7 @@ import (
 	"golang.org/x/xerrors"
 )
 
-var (
-	// カラス画像
-	crowImage *ebiten.Image
-
-	// カラス画像サイズ
-	crowImageSizeX = 0.2 // 元の大きさ 800
-	crowImageSizeY = 0.2 // 元の大きさ 773
-
-	// カラスの初期位置
-	defaultcrowPositionX = 960
-
+type Crows struct {
 	crowA *crow
 	crowB *crow
 	crowC *crow
@@ -31,36 +22,20 @@ var (
 	crowF *crow
 	crowG *crow
 	crowH *crow
+}
+
+var (
+	// カラス最高スピード
+	maxSpeed = 5
+	// カラス最低スピード
+	minSpeed = 1
+
+	// カラス出現頻度 最初は3秒ごと
+	frequently    = 3
+	frequentlySec = 60
 )
 
-type crow struct {
-	name         string
-	moveCountNum float64
-	moveSpeed    float64
-	positionY    float64
-	image        *ebiten.Image
-	running      bool
-}
-
-func newCrow(name string) *crow {
-	return &crow{
-		name:  name,
-		image: crowImage,
-	}
-}
-
-func ResetCrows() {
-	crowA = newCrow("A")
-	crowB = newCrow("B")
-	crowC = newCrow("C")
-	crowD = newCrow("D")
-	crowE = newCrow("E")
-	crowF = newCrow("F")
-	crowG = newCrow("G")
-	crowH = newCrow("H")
-}
-
-func Init() {
+func NewCrows() *Crows {
 	f, err := os.Open("./assets/img/カラス.png")
 	defer f.Close()
 	if err != nil {
@@ -72,264 +47,297 @@ func Init() {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
-	crowImage = ebiten.NewImageFromImage(i)
+	crowImage := ebiten.NewImageFromImage(i)
 
-	crowA = newCrow("A")
-	crowB = newCrow("B")
-	crowC = newCrow("C")
-	crowD = newCrow("D")
-	crowE = newCrow("E")
-	crowF = newCrow("F")
-	crowG = newCrow("G")
-	crowH = newCrow("H")
+	return &Crows{
+		crowA: newCrow("A", crowImage),
+		crowB: newCrow("B", crowImage),
+		crowC: newCrow("C", crowImage),
+		crowD: newCrow("D", crowImage),
+		crowE: newCrow("E", crowImage),
+		crowF: newCrow("F", crowImage),
+		crowG: newCrow("G", crowImage),
+		crowH: newCrow("H", crowImage),
+	}
 }
 
-func ImageDraw(screen *ebiten.Image, elapsedTime int, state *update.GameState) {
+type crow struct {
+	name        string
+	image       *ebiten.Image
+	imageWidth  float64
+	imageHeight float64
+	// default positionX
+	dx float64
+	// x軸移動値
+	movex float64
+	// 移動速度
+	moveSpeed float64
+	// current position y
+	cpy float64
+	// 移動中フラグ
+	run bool
+}
 
-	if crowA.running {
-		crowA.imageDraw(screen, state)
+func newCrow(name string, image *ebiten.Image) *crow {
+	return &crow{
+		name:        name,
+		image:       image,
+		imageWidth:  0.2,
+		imageHeight: 0.2,
+		dx:          game.ScreenWidth,
+	}
+}
+
+func (c *crow) resetCrow() {
+	c.movex = 0
+	c.moveSpeed = 0
+	c.cpy = 0
+	c.run = false
+}
+
+func (c *Crows) Reset() {
+	c.crowA.resetCrow()
+	c.crowB.resetCrow()
+	c.crowC.resetCrow()
+	c.crowD.resetCrow()
+	c.crowE.resetCrow()
+	c.crowF.resetCrow()
+	c.crowG.resetCrow()
+	c.crowH.resetCrow()
+
+	maxSpeed = 5
+
+	minSpeed = 1
+
+	frequently = 3
+	frequentlySec = 60
+}
+
+func (c *Crows) ImageDraw(screen *ebiten.Image, g *game.Game) {
+	if c.runTiming() {
+		// カラス投入
+		c.runCrow(g)
 	}
 
-	if crowB.running {
-		crowB.imageDraw(screen, state)
+	if c.crowA.run {
+		c.crowA.imageDraw(screen, g)
 	}
 
-	if crowC.running {
-		crowC.imageDraw(screen, state)
+	if c.crowB.run {
+		c.crowB.imageDraw(screen, g)
 	}
 
-	if crowD.running {
-		crowD.imageDraw(screen, state)
+	if c.crowC.run {
+		c.crowC.imageDraw(screen, g)
 	}
 
-	if state.Level > 1 && crowE.running {
-		crowE.imageDraw(screen, state)
+	if c.crowD.run {
+		c.crowD.imageDraw(screen, g)
 	}
 
-	if state.Level > 2 && crowF.running {
-		crowF.imageDraw(screen, state)
+	if g.State.Level > 1 && c.crowE.run {
+		c.crowE.imageDraw(screen, g)
 	}
 
-	if state.Level > 3 && crowG.running {
-		crowG.imageDraw(screen, state)
+	if g.State.Level > 2 && c.crowF.run {
+		c.crowF.imageDraw(screen, g)
 	}
 
-	if state.Level > 4 && crowH.running {
-		crowH.imageDraw(screen, state)
+	if g.State.Level > 3 && c.crowG.run {
+		c.crowG.imageDraw(screen, g)
 	}
 
-	// カラス出現頻度 最初は3秒ごと
-	frequently := 3
-	// カラス最高スピード
-	maxSpeed := 5
-	// カラス最低スピード
-	minSpeed := 1
+	if g.State.Level > 4 && c.crowH.run {
+		c.crowH.imageDraw(screen, g)
+	}
+}
 
-	frequentlySec := 60
+func (c *Crows) runTiming() bool {
+	//
+	return game.CallCount%frequentlySec == 0 && game.CallCount/frequentlySec%frequently == 0
+}
 
-	if state.Level > 1 {
+func (c *Crows) changeCrowSpec(g *game.Game) {
+	if g.State.Level > 1 {
 		frequently = 2
 	}
 
-	if state.Level > 2 {
+	if g.State.Level > 2 {
 		frequently = 2
 		maxSpeed = 7
 	}
 
-	if state.Level > 3 {
+	if g.State.Level > 3 {
 		frequently = 2
 		maxSpeed = 9
 	}
 
-	if state.Level > 4 {
+	if g.State.Level > 4 {
 		frequently = 1
 		maxSpeed = 11
 		frequentlySec = 80
 	}
 
-	if state.Level > 5 {
+	if g.State.Level > 5 {
 		frequently = 1
 		maxSpeed = 11
 		frequentlySec = 60
 	}
 
-	if state.Level > 6 {
+	if g.State.Level > 6 {
 		frequently = 1
 		maxSpeed = 11
 		frequentlySec = 25
 	}
 
-	if state.Level > 7 {
+	if g.State.Level > 7 {
 		frequently = 1
 		maxSpeed = 11
 		frequentlySec = 10
 	}
+}
 
-	if elapsedTime%frequentlySec == 0 && elapsedTime/frequentlySec%frequently == 0 {
-		rand.New(rand.NewSource(time.Now().UnixNano()))
-		// Y軸のマックス値
-		py := rand.Intn(550)
+func (c *Crows) runCrow(g *game.Game) {
 
-		// 移動スピードは 8 ~ 2の間
-		cs := rand.Intn(maxSpeed-minSpeed) + minSpeed
+	c.changeCrowSpec(g)
 
-		if !crowA.running {
-			crowA.running = true
-			crowA.positionY = float64(py)
-			crowA.moveSpeed = float64(cs)
-			return
-		}
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	// Y軸のマックス値
+	py := rand.Intn(550)
 
-		if crowA.running &&
-			!crowB.running {
-			crowB.running = true
-			crowB.positionY = float64(py)
-			crowB.moveSpeed = float64(cs)
-			return
-		}
+	// 移動スピードは 8 ~ 2の間
+	cs := rand.Intn(maxSpeed-minSpeed) + minSpeed
 
-		if crowB.running &&
-			!crowC.running {
-			crowC.running = true
-			crowC.positionY = float64(py)
-			crowC.moveSpeed = float64(cs)
-			return
-		}
+	if !c.crowA.run {
+		c.crowA.run = true
+		c.crowA.cpy = float64(py)
+		c.crowA.moveSpeed = float64(cs)
+		return
+	}
 
-		if crowC.running &&
-			!crowD.running {
-			crowD.running = true
-			crowD.positionY = float64(py)
-			crowD.moveSpeed = float64(cs)
-			return
-		}
+	if c.crowA.run &&
+		!c.crowB.run {
+		c.crowB.run = true
+		c.crowB.cpy = float64(py)
+		c.crowB.moveSpeed = float64(cs)
+		return
+	}
 
-		if state.Level > 1 &&
-			crowD.running &&
-			!crowE.running {
-			crowE.running = true
-			crowE.positionY = float64(py)
-			crowE.moveSpeed = float64(cs)
-			return
-		}
+	if c.crowB.run &&
+		!c.crowC.run {
+		c.crowC.run = true
+		c.crowC.cpy = float64(py)
+		c.crowC.moveSpeed = float64(cs)
+		return
+	}
 
-		if state.Level > 3 &&
-			crowE.running &&
-			!crowF.running {
-			crowF.running = true
-			crowF.positionY = float64(py)
-			crowF.moveSpeed = float64(cs)
-			return
-		}
+	if c.crowC.run &&
+		!c.crowD.run {
+		c.crowD.run = true
+		c.crowD.cpy = float64(py)
+		c.crowD.moveSpeed = float64(cs)
+		return
+	}
 
-		if state.Level > 5 &&
-			crowF.running &&
-			!crowG.running {
-			crowG.running = true
-			crowG.positionY = float64(py)
-			crowG.moveSpeed = float64(cs)
-			return
-		}
+	if g.State.Level > 1 &&
+		c.crowD.run &&
+		!c.crowE.run {
+		c.crowE.run = true
+		c.crowE.cpy = float64(py)
+		c.crowE.moveSpeed = float64(cs)
+		return
+	}
 
-		if state.Level > 7 &&
-			crowG.running &&
-			!crowH.running {
-			crowH.running = true
-			crowH.positionY = float64(py)
-			crowH.moveSpeed = float64(cs)
-			return
-		}
+	if g.State.Level > 3 &&
+		c.crowE.run &&
+		!c.crowF.run {
+		c.crowF.run = true
+		c.crowF.cpy = float64(py)
+		c.crowF.moveSpeed = float64(cs)
+		return
+	}
+
+	if g.State.Level > 5 &&
+		c.crowF.run &&
+		!c.crowG.run {
+		c.crowG.run = true
+		c.crowG.cpy = float64(py)
+		c.crowG.moveSpeed = float64(cs)
+		return
+	}
+
+	if g.State.Level > 7 &&
+		c.crowG.run &&
+		!c.crowH.run {
+		c.crowH.run = true
+		c.crowH.cpy = float64(py)
+		c.crowH.moveSpeed = float64(cs)
+		return
 	}
 }
 
-func (c *crow) imageDraw(screen *ebiten.Image, state *update.GameState) {
+func (c *crow) imageDraw(screen *ebiten.Image, g *game.Game) {
 	// 左に移動
-	if state.State == "run" {
+	if g.State.State == "run" {
 		c.incrementCrowPositionCount()
 	}
 
 	// オカメとカラスの衝突判定
-	if state.State == "run" && c.conflictValid() {
-		state.GameEnd()
+	if g.State.State == "run" && c.conflictValid() {
+		// ゲーム終了ステータスに変化
+		g.State.GameEnd()
+		// 衝突音
+		g.HitPlayer.Play()
 	}
 
-	if state.State == "run" {
-		// 画面から消えたか判定
-		if float64(defaultcrowPositionX)-c.moveCountNum < -160 {
-			c.moveCountNum = 1
-			c.running = false
+	// 画面から消えたか判定
+	if g.State.State == "run" && float64(c.dx)-c.movex < -160 {
+		c.resetCrow()
 
-			// スコアアップ
-			state.ScoreUp()
+		// スコアアップ
+		g.State.ScoreUp()
 
-			// 10匹ずつでレベルアップ
-			if state.Score%5 == 0 {
-				state.LevelUp()
-			}
+		// 10匹ずつでレベルアップ
+		if g.State.Score%10 == 0 {
+			g.State.LevelUp()
 		}
 	}
 
 	op := &ebiten.DrawImageOptions{}
 
 	// カラス画像の大きさ
-	op.GeoM.Scale(crowImageSizeX, crowImageSizeY)
+	op.GeoM.Scale(c.imageWidth, c.imageHeight)
 
 	// カラス画像の位置
-	op.GeoM.Translate(float64(defaultcrowPositionX)-c.moveCountNum, c.positionY)
+	op.GeoM.Translate(c.dx-c.movex, c.cpy)
 
 	// カラス画像描画
-	screen.DrawImage(crowImage, op)
+	screen.DrawImage(c.image, op)
 }
 
 func (c *crow) incrementCrowPositionCount() {
-	c.moveCountNum += c.moveSpeed
+	c.movex += c.moveSpeed
 }
 
 func (c *crow) conflictValid() bool {
 
-	// --------オカメが画面からはみ出ない設定---------
-	var cpl float64 = 0
-	var cpt float64 = 0
-
-	// オカメの一番左地点, オカメの一番上地点
-	cursolx, cursoly := ebiten.CursorPosition()
-
-	cpl = float64(cursolx)
-	cpt = float64(cursoly)
-
-	if cpl <= 0 {
-		cpl = 0
-	}
-
-	if cpl >= (960 - (784 * 0.08)) {
-		cpl = 960 - (784 * 0.08)
-	}
-
-	if cpt <= 0 {
-		cpt = 0
-	}
-
-	if cpt >= (720 - (745 * 0.08)) {
-		cpt = 720 - (745 * 0.08)
-	}
+	cpl, cpt := cockatiel.CurrentPosition()
 
 	// 745, 784 はオカメ画像の元々大きさ
 	cpr := cpl + (745 * 0.08) // オカメの一番右地点
 	cpb := cpt + (784 * 0.08) // オカメの一番下地点
 
-	// --------オカメが画面からはみ出ない設定---------
-
 	// オカメの一番右地点が カラスの一番左地点を超えているか。 オカメの一番右地点がカラスの右地点より手前か。
-	cockatielRightValid := cpr >= float64(defaultcrowPositionX)-c.moveCountNum && cpr <= float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX)
+	cockatielRightValid := cpr >= float64(c.dx)-c.movex && cpr <= float64(c.dx)-c.movex+(790*c.imageWidth)
 
 	// オカメの一番左地点がカラスの一番右地点より手前か。オカメの一番左地点がカラスの左地点を超えているか。
-	cockatielLeftValid := float64(defaultcrowPositionX)-c.moveCountNum+(790*crowImageSizeX) >= cpl && cpl >= float64(defaultcrowPositionX)-c.moveCountNum
+	cockatielLeftValid := float64(c.dx)-c.movex+(790*c.imageWidth) >= cpl && cpl >= float64(c.dx)-c.movex
 
 	// オカメの一番下地点がカラスの一番上地点を超えているか。オカメの下地点が、カラスの下地点より手前か。
-	cockatielBottomValid := cpb >= c.positionY && cpb <= c.positionY+(763*crowImageSizeY)
+	cockatielBottomValid := cpb >= c.cpy && cpb <= c.cpy+(763*c.imageHeight)
 
 	// オカメの一番上地点がカラスの一番下地点より手前か。オカメの一番上地点がカラスの一番上地点を超えているか。
-	cockatielTopValid := c.positionY+(763*crowImageSizeY) >= cpt && cpt >= c.positionY
+	cockatielTopValid := c.cpy+(763*c.imageHeight) >= cpt && cpt >= c.cpy
 
 	// 当たり判定
 	return (cockatielRightValid && (cockatielBottomValid || cockatielTopValid)) ||
@@ -337,21 +345,3 @@ func (c *crow) conflictValid() bool {
 		(cockatielTopValid && (cockatielRightValid || cockatielLeftValid)) ||
 		(cockatielBottomValid && (cockatielRightValid || cockatielLeftValid))
 }
-
-// func execNextCrow(key string) bool {
-// 	return CrowPositionCountMap[nextKey(key)]["exec"] == 1
-// }
-
-// func nextKey(key string) string {
-// 	switch key {
-// 	case "A":
-// 		return "B"
-// 	case "B":
-// 		return "C"
-// 	case "C":
-// 		return "D"
-// 	case "D":
-// 		return "A"
-// 	}
-// 	return "A"
-// }
