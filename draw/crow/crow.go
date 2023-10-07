@@ -1,12 +1,12 @@
 package crow
 
 import (
+	"bytes"
 	"cockatiel-fright-crow/draw/cockatiel"
 	"cockatiel-fright-crow/game"
 	"image/png"
 	"log"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,13 +36,7 @@ var (
 )
 
 func NewCrows() *Crows {
-	f, err := os.Open("./assets/img/カラス.png")
-	defer f.Close()
-	if err != nil {
-		e := xerrors.Errorf("error: %w", err)
-		log.Fatalf("%+v\n", e)
-	}
-	i, err := png.Decode(f)
+	i, err := png.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)

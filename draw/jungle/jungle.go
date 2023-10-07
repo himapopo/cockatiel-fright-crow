@@ -1,9 +1,9 @@
 package jungle
 
 import (
+	"bytes"
 	"image/png"
 	"log"
-	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/xerrors"
@@ -18,14 +18,7 @@ type Jungle struct {
 }
 
 func NewJungle() *Jungle {
-
-	f, err := os.Open("./assets/img/ジャングル.png")
-	defer f.Close()
-	if err != nil {
-		e := xerrors.Errorf("error: %w", err)
-		log.Fatalf("%+v\n", e)
-	}
-	i, err := png.Decode(f)
+	i, err := png.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
