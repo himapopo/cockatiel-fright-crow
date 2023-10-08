@@ -60,19 +60,21 @@ func (g *Game) Update() error {
 
 	// スタート画面からのみスペースキーでゲーム開始可能
 	if g.State.State == "start" {
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			g.State.GameRun()
 		}
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-		// ゲームオーバー表示
-		g.State.GameReStart()
-		// カラスの位置初期化
-		g.Crows.Reset()
-		// オカメの位置初期化
-		g.CockatielImage.Reset()
+	if g.State.State == "end" {
+		if inpututil.IsKeyJustPressed(ebiten.KeyR) || inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			g.State.GameReStart()
+			// カラスの位置初期化
+			g.Crows.Reset()
+			// オカメの位置初期化
+			g.CockatielImage.Reset()
+		}
 	}
+
 	return nil
 }
 
