@@ -112,12 +112,12 @@ func (c *Crows) Reset() {
 	c.crowG.resetCrow()
 	c.crowH.resetCrow()
 
-	maxSpeed = 5
+	maxSpeed = 9
 
-	minSpeed = 1
+	minSpeed = 2
 
-	frequently = 3
-	frequentlySec = 60
+	frequently = 1
+	frequentlySec = 30
 }
 
 func (c *Crows) ImageDraw(screen *ebiten.Image, g *game.Game) {
@@ -146,23 +146,23 @@ func (c *Crows) ImageDraw(screen *ebiten.Image, g *game.Game) {
 		c.crowD.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 1 && c.crowE.run {
+	if c.crowE.run {
 		c.crowE.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 3 && c.crowF.run {
+	if g.State.Level > 1 && c.crowF.run {
 		c.crowF.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 5 && c.crowG.run {
+	if g.State.Level > 2 && c.crowG.run {
 		c.crowG.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 7 && c.crowH.run {
+	if g.State.Level > 3 && c.crowH.run {
 		c.crowH.imageDraw(screen, g)
 	}
 
-	if g.State.Level > 9 && c.crowH.run {
+	if g.State.Level > 4 && c.crowH.run {
 		c.crowI.imageDraw(screen, g)
 	}
 }
@@ -174,56 +174,51 @@ func (c *Crows) runTiming() bool {
 
 func (c *Crows) changeCrowSpec(g *game.Game) {
 	if g.State.Level > 1 {
-		frequently = 2
+		maxSpeed = 10
+		frequentlySec = 25
 	}
 
 	if g.State.Level > 2 {
-		frequently = 2
-		maxSpeed = 7
-		frequentlySec = 55
-	}
-
-	if g.State.Level > 3 {
-		frequently = 2
-		maxSpeed = 9
-		frequentlySec = 50
-	}
-
-	if g.State.Level > 4 {
 		frequently = 1
 		maxSpeed = 11
-		frequentlySec = 45
-	}
-
-	if g.State.Level > 5 {
-		frequently = 1
-		maxSpeed = 11
-		frequentlySec = 40
-	}
-
-	if g.State.Level > 6 {
-		frequently = 1
-		maxSpeed = 11
-		frequentlySec = 30
-	}
-
-	if g.State.Level > 7 {
-		frequently = 1
-		maxSpeed = 12
 		frequentlySec = 20
 	}
 
-	if g.State.Level > 8 {
+	if g.State.Level > 3 {
 		frequently = 1
 		maxSpeed = 13
 		frequentlySec = 10
 	}
 
-	if g.State.Level > 9 {
+	if g.State.Level > 4 {
 		frequently = 1
 		maxSpeed = 14
 		frequentlySec = 5
 	}
+
+	// if g.State.Level > 5 {
+	// 	frequently = 1
+	// 	maxSpeed = 11
+	// 	frequentlySec = 40
+	// }
+
+	// if g.State.Level > 6 {
+	// 	frequently = 1
+	// 	maxSpeed = 11
+	// 	frequentlySec = 30
+	// }
+
+	// if g.State.Level > 7 {
+
+	// }
+
+	// if g.State.Level > 8 {
+
+	// }
+
+	// if g.State.Level > 9 {
+
+	// }
 }
 
 func (c *Crows) runCrow(g *game.Game) {
@@ -280,8 +275,7 @@ func (c *Crows) runCrow(g *game.Game) {
 		return
 	}
 
-	if g.State.Level > 1 &&
-		c.crowD.run &&
+	if c.crowD.run &&
 		!c.crowE.run {
 		c.crowE.run = true
 		c.crowE.cpy = float64(py)
@@ -289,7 +283,7 @@ func (c *Crows) runCrow(g *game.Game) {
 		return
 	}
 
-	if g.State.Level > 3 &&
+	if g.State.Level > 1 &&
 		c.crowE.run &&
 		!c.crowF.run {
 		c.crowF.run = true
@@ -298,7 +292,7 @@ func (c *Crows) runCrow(g *game.Game) {
 		return
 	}
 
-	if g.State.Level > 5 &&
+	if g.State.Level > 2 &&
 		c.crowF.run &&
 		!c.crowG.run {
 		c.crowG.run = true
@@ -307,7 +301,7 @@ func (c *Crows) runCrow(g *game.Game) {
 		return
 	}
 
-	if g.State.Level > 7 &&
+	if g.State.Level > 3 &&
 		c.crowG.run &&
 		!c.crowH.run {
 		c.crowH.run = true
@@ -316,7 +310,7 @@ func (c *Crows) runCrow(g *game.Game) {
 		return
 	}
 
-	if g.State.Level > 9 &&
+	if g.State.Level > 4 &&
 		c.crowH.run &&
 		!c.crowI.run {
 		c.crowI.run = true
