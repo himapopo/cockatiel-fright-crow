@@ -90,7 +90,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		// カラス画像描画
 		g.Crows.ImageDraw(screen, g)
 
-		g.textDraw(screen, 4, 12, 2.5, 2.5, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level))
+		g.textDraw(screen, 4, 12, 2.5, 2.5, "Score: "+strconv.Itoa(g.State.Score))
 	}
 
 	// スタート画面
@@ -103,12 +103,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		g.textDraw(screen, 160, 200, 2.5, 2.5, "GAME OVER")
 
-		g.textDraw(screen, 130, 230, 2.5, 2.5, "Score: "+strconv.Itoa(g.State.Score)+" | Level: "+strconv.Itoa(g.State.Level))
+		g.textDraw(screen, 160, 230, 2.5, 2.5, "Score: "+strconv.Itoa(g.State.Score))
 
 		g.textDraw(screen, 110, 260, 2.5, 2.5, "Press R Key Return Start Page")
 	}
-
-	// ebitenutil.DebugPrint(screen, strconv.Itoa(elapsedTime/60))
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
