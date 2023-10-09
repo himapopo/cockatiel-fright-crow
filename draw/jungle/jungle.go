@@ -17,7 +17,7 @@ type Jungle struct {
 	ty          float64
 }
 
-func NewJungle() *Jungle {
+func NewJungle(imageByte []byte) *Jungle {
 	i, err := png.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)

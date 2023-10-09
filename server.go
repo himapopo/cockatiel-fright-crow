@@ -6,8 +6,6 @@ import (
 	"net/http"
 )
 
-// viewsディレクトリ下のファイルを全て変数に格納する
-//
 //go:embed views/*
 var views embed.FS
 
@@ -28,9 +26,7 @@ func main() {
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/healthcheck", healthcheck)
 
-	// viewsに格納したファイルを全て公開
 	http.Handle("/views/", http.FileServer(http.FS(views)))
 
-	// httpサーバーを立ち上げ
 	http.ListenAndServe(":8080", nil)
 }

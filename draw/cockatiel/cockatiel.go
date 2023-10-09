@@ -31,7 +31,7 @@ type Cockatiel struct {
 	cpy float64
 }
 
-func NewCockatiel() *Cockatiel {
+func NewCockatiel(imageByte []byte) *Cockatiel {
 	i, err := png.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
