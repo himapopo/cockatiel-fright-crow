@@ -25,6 +25,9 @@ var (
 	//go:embed assets/img/crow.png
 	crowImageByte []byte
 
+	//go:embed assets/img/rare_cockatiel.png
+	rareCockatielImageByte []byte
+
 	//go:embed assets/img/jungle.png
 	jungleImageByte []byte
 
@@ -45,7 +48,7 @@ func main() {
 		Start:          start.NewStart(startImageByte),
 		JungleImage:    jungle.NewJungle(jungleImageByte),
 		CockatielImage: cockatiel.NewCockatiel(cockatielImageByte),
-		Crows:          crow.NewCrows(crowImageByte, cockatielImageByte),
+		Crows:          crow.NewCrows(crowImageByte, rareCockatielImageByte),
 		State:          game.NewGameState(),
 		HitPlayer:      sound.NewHitPlayer(ac),
 	}); err != nil {
