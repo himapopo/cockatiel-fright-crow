@@ -28,26 +28,26 @@ type Crows struct {
 
 var (
 	// カラス最高スピード
-	maxSpeed = 5
+	maxSpeed = 9
 	// カラス最低スピード
-	minSpeed = 1
+	minSpeed = 2
 
-	// カラス出現頻度 最初は3秒ごと
-	frequently    = 3
-	frequentlySec = 60
+	// カラス出現頻度
+	frequently    = 1
+	frequentlySec = 30
 )
 
-func NewCrows() *Crows {
+func NewCrows(crowImageByte, rareCockatielImageByte []byte) *Crows {
 	// カラス画像
-	i, err := png.Decode(bytes.NewReader(imageByte))
+	i, err := png.Decode(bytes.NewReader(crowImageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
 	}
 	crowImage := ebiten.NewImageFromImage(i)
 
-	// レアキャラ画像
-	i, err = png.Decode(bytes.NewReader(rareImageByte))
+	// レアキャラ（おかめ）画像
+	i, err = png.Decode(bytes.NewReader(rareCockatielImageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)
 		log.Fatalf("%+v\n", e)
@@ -111,6 +111,8 @@ func (c *Crows) Reset() {
 	c.crowF.resetCrow()
 	c.crowG.resetCrow()
 	c.crowH.resetCrow()
+	c.crowI.resetCrow()
+	c.rare.resetCrow()
 
 	maxSpeed = 9
 
@@ -195,30 +197,6 @@ func (c *Crows) changeCrowSpec(g *game.Game) {
 		maxSpeed = 14
 		frequentlySec = 5
 	}
-
-	// if g.State.Level > 5 {
-	// 	frequently = 1
-	// 	maxSpeed = 11
-	// 	frequentlySec = 40
-	// }
-
-	// if g.State.Level > 6 {
-	// 	frequently = 1
-	// 	maxSpeed = 11
-	// 	frequentlySec = 30
-	// }
-
-	// if g.State.Level > 7 {
-
-	// }
-
-	// if g.State.Level > 8 {
-
-	// }
-
-	// if g.State.Level > 9 {
-
-	// }
 }
 
 func (c *Crows) runCrow(g *game.Game) {
@@ -229,14 +207,13 @@ func (c *Crows) runCrow(g *game.Game) {
 	// Y軸のマックス値
 	py := rand.Intn(550)
 
-	// 移動スピードは 8 ~ 2の間
 	cs := rand.Intn(maxSpeed-minSpeed) + minSpeed
 
-	// レベル5以上からレアキャラ出現
-	if g.State.Level > 4 {
+	// レベル4以上からレアキャラ出現
+	if g.State.Level > 3 {
 		rand.New(rand.NewSource(time.Now().UnixNano()))
-		rareNum := rand.Intn(500)
-		if rareNum == 250 && !c.rare.run {
+		rareNum := rand.Intn(200)
+		if rareNum == 100 && !c.rare.run {
 			c.rare.run = true
 			c.rare.cpy = float64(py)
 			c.rare.moveSpeed = float64(cs)

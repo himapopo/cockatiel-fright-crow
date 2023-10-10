@@ -15,7 +15,7 @@ type Start struct {
 	imageHeight float64
 }
 
-func NewStart() *Start {
+func NewStart(imageByte []byte) *Start {
 	i, err := jpeg.Decode(bytes.NewReader(imageByte))
 	if err != nil {
 		e := xerrors.Errorf("error: %w", err)

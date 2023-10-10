@@ -13,7 +13,7 @@ type BgmPlayer struct {
 	player *oto.Player
 }
 
-func NewBgmPlayer(ac *AudioContext) *BgmPlayer {
+func NewBgmPlayer(bgmByte []byte, ac *AudioContext) *BgmPlayer {
 	decodedMp3, err := mp3.NewDecoder(bytes.NewReader(bgmByte))
 	if err != nil {
 		panic("mp3.NewDecoder failed: " + err.Error())
