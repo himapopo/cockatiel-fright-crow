@@ -38,9 +38,9 @@ var (
 func main() {
 	ac := sound.NewAudioContext()
 
-	bgm := sound.NewBgmPlayer(bgmByte, ac)
+	// bgm := sound.NewBgmPlayer(bgmByte, ac)
 
-	go bgm.Play()
+	// go bgm.Play()
 
 	ebiten.SetWindowSize(game.ScreenWidth, game.ScreenHeight)
 	ebiten.SetWindowTitle("Cockatiel Fright Crow")
